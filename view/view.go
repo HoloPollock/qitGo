@@ -26,6 +26,6 @@ type View struct {
 	List   *widgets.List
 }
 
-func newView() *View {
+// func newView() *View {
 
-}
+// }
