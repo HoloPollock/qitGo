@@ -25,6 +25,7 @@ type ClickList struct {
 	SelectedRow      int
 	topRow           int
 	SelectedRowStyle Style
+	InFocus          bool
 }
 
 func NewClickList() *ClickList {
@@ -37,6 +38,11 @@ func NewClickList() *ClickList {
 
 func (self *ClickList) Draw(buf *Buffer) {
 	self.Block.Draw(buf)
+	if !self.InFocus {
+		self.SelectedRowStyle.Bg = ColorClear
+	} else {
+		self.SelectedRowStyle.Bg = ColorBlack
+	}
 
 	point := self.Inner.Min
 
@@ -95,22 +101,24 @@ func (self *ClickList) Draw(buf *Buffer) {
 	}
 }
 
-func (self *ClickList) ScrollAmount(amount int) {
+func (self *ClickList) ScrollAmount(amount int) bool {
 	if len(self.Rows)-int(self.SelectedRow) <= amount {
 		self.SelectedRow = len(self.Rows) - 1
+		return true
 	} else if int(self.SelectedRow)+amount < 0 {
 		self.SelectedRow = 0
 	} else {
 		self.SelectedRow += amount
 	}
+	return false
 }
 
 func (self *ClickList) ScrollUp() {
 	self.ScrollAmount(-1)
 }
 
-func (self *ClickList) ScrollDown() {
-	self.ScrollAmount(1)
+func (self *ClickList) ScrollDown() bool {
+	return self.ScrollAmount(1)
 }
 
 func (self *ClickList) ScrollPageUp() {
@@ -144,4 +152,8 @@ func (self *ClickList) ScrollBottom() {
 
 func (self *ClickList) Toggle() {
 	self.Rows[self.SelectedRow].toggle()
+}
+
+func (self *ClickList) GetLength() int {
+	return len(self.Rows)
 }
