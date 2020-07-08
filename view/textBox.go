@@ -39,10 +39,26 @@ func (self *TextBox) AddLetter(l string) {
 	self.cursor++
 }
 
+func (self *TextBox) DeleteLetter() {
+	if self.length == 0 {
+		return
+	}
+	self.length--
+	self.Buffer = self.Buffer[:self.cursor-1] + self.Buffer[self.cursor:]
+	self.cursor--
+
+}
+
 func (self *TextBox) CursorRight() {
 	self.cursor++
+	if self.cursor > self.length {
+		self.cursor = self.length
+	}
 }
 
 func (self *TextBox) CursorLeft() {
 	self.cursor--
+	if self.cursor < 0 {
+		self.cursor = 0
+	}
 }
