@@ -31,7 +31,7 @@ func NewClickList() *ClickList {
 	return &ClickList{
 		Block:            *NewBlock(),
 		TextStyle:        Theme.List.Text,
-		SelectedRowStyle: Theme.List.Text,
+		SelectedRowStyle: NewStyle(ColorWhite, ColorBlack),
 	}
 }
 
@@ -60,8 +60,6 @@ func (self *ClickList) Draw(buf *Buffer) {
 		}
 		buf.SetCell(NewCell(']', defstyle), point)
 		point = point.Add(image.Pt(rw.RuneWidth(']'), 0))
-		buf.SetCell(NewCell('[', defstyle), point)
-		point = point.Add(image.Pt(rw.RuneWidth('['), 0))
 		point = point.Add(image.Pt(3, 0)) // add spacing
 		for j := 0; j < len(cells) && point.Y < self.Inner.Max.Y; j++ {
 			style := cells[j].Style
@@ -95,4 +93,55 @@ func (self *ClickList) Draw(buf *Buffer) {
 		}
 		point = image.Pt(self.Inner.Min.X, point.Y+1)
 	}
+}
+
+func (self *ClickList) ScrollAmount(amount int) {
+	if len(self.Rows)-int(self.SelectedRow) <= amount {
+		self.SelectedRow = len(self.Rows) - 1
+	} else if int(self.SelectedRow)+amount < 0 {
+		self.SelectedRow = 0
+	} else {
+		self.SelectedRow += amount
+	}
+}
+
+func (self *ClickList) ScrollUp() {
+	self.ScrollAmount(-1)
+}
+
+func (self *ClickList) ScrollDown() {
+	self.ScrollAmount(1)
+}
+
+func (self *ClickList) ScrollPageUp() {
+	// If an item is selected below top row, then go to the top row.
+	if self.SelectedRow > self.topRow {
+		self.SelectedRow = self.topRow
+	} else {
+		self.ScrollAmount(-self.Inner.Dy())
+	}
+}
+
+func (self *ClickList) ScrollPageDown() {
+	self.ScrollAmount(self.Inner.Dy())
+}
+
+func (self *ClickList) ScrollHalfPageUp() {
+	self.ScrollAmount(-int(FloorFloat64(float64(self.Inner.Dy()) / 2)))
+}
+
+func (self *ClickList) ScrollHalfPageDown() {
+	self.ScrollAmount(int(FloorFloat64(float64(self.Inner.Dy()) / 2)))
+}
+
+func (self *ClickList) ScrollTop() {
+	self.SelectedRow = 0
+}
+
+func (self *ClickList) ScrollBottom() {
+	self.SelectedRow = len(self.Rows) - 1
+}
+
+func (self *ClickList) Toggle() {
+	self.Rows[self.SelectedRow].toggle()
 }
